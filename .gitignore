@@ -1,0 +1,30 @@
+# Node modules
+/node_modules
+
+# Yarn
+yarn.lock
+
+# Environment variables
+/.env
+
+.data
+
+# Logs
+*.log
+*.log.*
+
+# TypeScript
+/dist
+/tsconfig.tsbuildinfo
+
+# Docker
+.docker-compose.override.yml
+
+docker-compose.yml
+Dockerfile
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+.idea

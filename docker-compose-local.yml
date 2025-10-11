@@ -1,0 +1,81 @@
+version: "3.8"
+
+services:
+  traefik:
+    image: "traefik:v2.4"
+    container_name: "traefik"
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--entrypoints.http.address=:80"
+      - "--global.sendAnonymousUsage=false"
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+
+  db:
+    container_name: "${DB_HOST}"
+    image: postgres:12.4-alpine
+    volumes:
+      - "./.data:/var/lib/postgresql/data:rw"
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: "${DB_DATABASE}"
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+    restart: unless-stopped
+    labels:
+      traefik.enable: true
+      traefik.http.routers.pg-web.rule: Host(`${DB_HOST}`)
+      traefik.http.routers.pg-web.entrypoints: http
+
+  redis:
+    image: redis:7-alpine
+    container_name: boilerplate-rest-ai-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    environment:
+      - REDIS_HOST=redis
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: boilerplate-rest-ai-app
+    depends_on:
+      redis:
+        condition: service_healthy
+      db:
+        condition: service_started
+    ports:
+      - "${API_PORT}:${API_PORT}"
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - /usr/src/app/dist
+    working_dir: /usr/src/app
+    command: sh -c "yarn install && yarn dev"
+    environment:
+      - NODE_ENV=local
+      - REDIS_HOST=redis
+      - DB_HOST=${DB_HOST}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_DATABASE=${DB_DATABASE}
+      - API_PORT=${API_PORT}
+
+volumes:
+  redis_data:
+  postgres-data:
