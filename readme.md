@@ -1,157 +1,146 @@
 # Boilerplate REST API
 
-Complete boilerplate for developing REST APIs with Node.js, TypeScript, Prisma, and Docker.
+A Clean Architecture REST API boilerplate with TypeScript, Express, Prisma, and Dependency Injection.
+
+## 🏗️ Architecture
+
+This project follows **Clean Architecture** principles:
+```
+src/
+├── domain/                 # Enterprise business rules
+│   ├── entities/           # Business objects
+│   ├── repositories/       # Repository interfaces
+│   └── providers/          # Provider interfaces
+│
+├── application/            # Application business rules
+│   ├── use-cases/          # Use cases (interactors)
+│   └── dtos/               # Data transfer objects
+│
+├── infrastructure/         # Frameworks & drivers
+│   ├── config/             # Environment configuration
+│   ├── database/           # Database implementations
+│   ├── http/               # Express setup, controllers, routes
+│   ├── providers/          # Provider implementations
+│   └── services/           # External services
+│
+├── shared/                 # Shared utilities
+│   ├── container/          # Dependency injection
+│   └── errors/             # Custom errors
+│
+└── main.ts                 # Application entry point
+```
 
 ## 🚀 Technologies
 
-- **Node.js** - JavaScript Runtime
-- **TypeScript** - Typed JavaScript Superset
-- **Prisma** - Modern ORM for Node.js and TypeScript
-- **Docker** - Application Containerization
-- **Express** - Minimalist Web Framework (inferred from structure)
+- **Node.js** (>=18)
+- **TypeScript**
+- **Express**
+- **Prisma** (ORM)
+- **PostgreSQL**
+- **Redis**
+- **Tsyringe** (Dependency Injection)
+- **Zod** (Validation)
+- **Pino** (Logging)
+- **Vitest** (Testing)
+- **Docker**
 
 ## 📋 Prerequisites
 
-Make sure you have the following installed on your machine:
+- Node.js >= 18
+- Yarn
+- Docker & Docker Compose
 
-- [Node.js](https://nodejs.org/) (version 18 or higher)
-- [Yarn](https://yarnpkg.com/)
-- [Docker](https://www.docker.com/)
-- [Docker Compose](https://docs.docker.com/compose/)
+## ⚙️ Setup
 
-## ⚙️ Environment Setup
-
-### 1. Clone the repository
-
+### 1. Clone and install
 ```bash
 git clone <repository-url>
 cd boilerplate-rest-api
-```
-
-### 2. Configure environment variables
-
-Create the `.env` file in the project root based on the example file:
-
-```bash
-cp .env.local .env
-```
-
-Edit the `.env` file and configure the variables according to your environment.
-
-### 3. Configure Docker Compose
-
-Create the `docker-compose.yml` file based on the example file:
-
-```bash
-cp docker-compose-local.yml docker-compose.yml
-```
-
-### 4. Configure Dockerfile
-
-Create the `Dockerfile` based on the example file:
-
-```bash
-cp Dockerfile-local Dockerfile
-```
-
-### 5. Install dependencies
-
-```bash
 yarn install
 ```
 
-### 6. Start the application
-
+### 2. Environment variables
 ```bash
+cp .env.example .env
+```
+
+### 3. Start with Docker
+```bash
+cp docker-compose.local.yml docker-compose.yml
+cp Dockerfile.local Dockerfile
 yarn up
 ```
 
-The application will be running and accessible as configured in your `.env` file.
-
-### 7. Stop the application
-
-To stop all containers:
-
+### 4. Run migrations
 ```bash
-yarn down
+yarn prisma:deploy
 ```
 
-## 🗄️ Prisma Commands
+### 5. Access the API
+```
+http://localhost:3333/api/health
+```
 
-The boilerplate includes useful scripts for database management with Prisma:
+## 📜 Scripts
 
-### Complete database reset
+| Command | Description |
+|---------|-------------|
+| `yarn dev` | Start development server |
+| `yarn build` | Build for production |
+| `yarn start` | Start production server |
+| `yarn up` | Start Docker containers |
+| `yarn down` | Stop Docker containers |
+| `yarn test` | Run tests |
+| `yarn test:watch` | Run tests in watch mode |
+| `yarn test:coverage` | Run tests with coverage |
+| `yarn lint` | Lint code |
+| `yarn format` | Format code |
+| `yarn prisma:migrate <name>` | Create migration |
+| `yarn prisma:deploy` | Deploy migrations |
+| `yarn prisma:generate` | Generate Prisma client |
+| `yarn prisma:studio` | Open Prisma Studio |
+| `yarn prisma:reset` | Reset database |
 
+## 🛣️ API Endpoints
+
+### Health
+- `GET /api/health` - Health check
+
+### Users
+- `POST /api/users` - Create user
+- `GET /api/users` - List users
+- `GET /api/users/:id` - Get user by ID
+- `PUT /api/users/:id` - Update user
+- `DELETE /api/users/:id` - Delete user
+
+## 🧪 Testing
 ```bash
-yarn prisma:reset
+# Run all tests
+yarn test
+
+# Watch mode
+yarn test:watch
+
+# Coverage
+yarn test:coverage
 ```
 
-Removes all data and recreates the database from scratch.
+## 🐳 Docker
 
-### Reset with migrations
-
+### Development
 ```bash
-yarn prisma:migrate:reset
+cp docker-compose.local.yml docker-compose.yml
+cp Dockerfile.local Dockerfile
+docker-compose up
 ```
 
-Resets the database and applies all migrations again.
-
-### Create first migration
-
+### Production
 ```bash
-yarn prisma:migrate first
+cp docker-compose.prod.yml docker-compose.yml
+cp Dockerfile.prod Dockerfile
+docker-compose up -d
 ```
 
-Creates the first migration for your Prisma schema.
+## 📝 License
 
-### Synchronize schema
-
-```bash
-yarn prisma:sync
-```
-
-Synchronizes the Prisma schema with the database without creating migrations.
-
-## 📁 Project Structure
-
-```
-.
-├── src/
-│   ├── config/       # Application configurations
-│   ├── core/         # Core functionalities (errors, prisma)
-│   ├── http/         # HTTP layer (middlewares, handlers)
-│   ├── modules/      # Application modules
-│   │   └── user/     # Module example (controller, model, repository, route, service)
-│   ├── routes/       # Route definitions
-│   ├── services/     # External services (cron, redis, zapi)
-│   └── utils/        # Utilities
-├── prisma/           # Prisma schema and migrations
-├── seeds/            # Seeds to populate the database
-└── .env              # Environment variables
-```
-
-## 🧪 Available Scripts
-
-- `yarn up` - Start Docker containers
-- `yarn down` - Stop Docker containers
-- `yarn install` - Install project dependencies
-- `yarn prisma:reset` - Complete database reset
-- `yarn prisma:migrate:reset` - Database reset with migrations
-- `yarn prisma:migrate first` - Create first migration
-- `yarn prisma:sync` - Synchronize schema with database
-
-## 📝 Development
-
-During development, you can use Prisma commands to manage your schema:
-
-1. Modify the `prisma/schema.prisma` file
-2. Run `yarn prisma:migrate first` to create the migration
-3. Run `yarn prisma:sync` to apply the changes
-
-## 🤝 Contributing
-
-Contributions are always welcome! Feel free to open issues and pull requests.
-
-## 📄 License
-
-This project is under the MIT license.
+MIT
