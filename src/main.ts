@@ -1,5 +1,8 @@
 import "reflect-metadata";
 import "./shared/container";
+import { initSentry } from "./infrastructure/services/sentry";
+
+initSentry();
 
 import http from "http";
 import { app } from "./infrastructure/http";

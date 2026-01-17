@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { AppError } from "../../../shared/errors";
 import { env } from "../../config";
+import { Sentry } from "../../services/sentry";
 
 export function errorHandlerMiddleware(
   err: unknown,
@@ -15,6 +16,15 @@ export function errorHandlerMiddleware(
 
     if (err.statusCode >= 500) {
       log.error({ err, url: req.originalUrl, method: req.method }, err.message);
+
+      // Envia erros 500+ para o Sentry
+      Sentry.captureException(err, {
+        tags: { code: err.code },
+        extra: {
+          url: req.originalUrl,
+          method: req.method,
+        },
+      });
     } else {
       log.warn({ err, url: req.originalUrl, method: req.method }, err.message);
     }
@@ -28,6 +38,17 @@ export function errorHandlerMiddleware(
 
   const log = req.log || console;
   log.error({ err, url: req.originalUrl, method: req.method }, "Unhandled error");
+
+  // Envia erros não tratados para o Sentry
+  if (err instanceof Error) {
+    Sentry.captureException(err, {
+      tags: { code: "INTERNAL_ERROR" },
+      extra: {
+        url: req.originalUrl,
+        method: req.method,
+      },
+    });
+  }
 
   res.status(500).json({
     ok: false,
