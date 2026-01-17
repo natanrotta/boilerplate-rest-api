@@ -21,7 +21,7 @@ src/
 │   ├── database/           # Database implementations
 │   ├── http/               # Express setup, controllers, routes
 │   ├── providers/          # Provider implementations
-│   └── services/           # External services
+│   └── services/           # External services (Sentry, Scheduler, etc.)
 │
 ├── shared/                 # Shared utilities
 │   ├── container/          # Dependency injection
@@ -43,6 +43,30 @@ src/
 - **Pino** (Logging)
 - **Vitest** (Testing)
 - **Docker**
+
+## 🛡️ Security
+
+This boilerplate includes built-in security features:
+
+| Feature | Description |
+|---------|-------------|
+| **Helmet** | Secure HTTP headers (XSS, HSTS, etc.) |
+| **Rate Limit** | 1000 requests per 5 minutes per IP |
+| **CORS** | Configurable allowed origins |
+| **Body Limit** | JSON body limited to 10kb |
+| **Trust Proxy** | Support for load balancers/reverse proxies |
+| **Sentry** | Error monitoring and tracking (optional) |
+
+### Sentry Setup (Optional)
+
+1. Create an account at [sentry.io](https://sentry.io)
+2. Create a new Node.js project
+3. Add the DSN to your `.env`:
+```env
+SENTRY_DSN=https://your-dsn@sentry.io/project-id
+```
+
+Leave `SENTRY_DSN` empty to disable error tracking.
 
 ## 📋 Prerequisites
 
@@ -104,7 +128,8 @@ http://localhost:3333/api/health
 ## 🛣️ API Endpoints
 
 ### Health
-- `GET /api/health` - Health check
+- `GET /healthz` - Health check (for load balancers)
+- `GET /api/health` - API health check
 
 ### Users
 - `POST /api/users` - Create user
